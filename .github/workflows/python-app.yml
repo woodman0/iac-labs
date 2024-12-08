@@ -26,6 +26,13 @@ jobs:
     - name: Install dependencies
 
     - name: Install Poetry Action
-  # You may pin to the exact commit or the version.
-  # uses: snok/install-poetry@93ada01c735cc8a383ce0ce2ae205a21c415379b
       uses: snok/install-poetry@v1.3.4
+      
+    - name: Run task tests
+      run: poetry run task test
+    - name: Run task lint
+      run: poetry run task lint
+    - name: Run task formatter
+      run: poetry run task formatter
+    - name: Run task security
+      run: poetry run task security
