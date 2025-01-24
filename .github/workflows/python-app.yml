@@ -16,7 +16,7 @@ jobs:
       run:
         working-directory: ./example-app
     concurrency:
-      group: lint
+      group: build
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -25,14 +25,37 @@ jobs:
       with:
         path: ~/.cache/pypoetry/virtualenvs
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
     - name: Install Poetry Action
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
-    - run: poetry run task test
+
+  linter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./example-app
+    concurrency:
+      group: linter
+    needs: build  # Linter uruchamia się po zakończeniu joba 'build'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pypoetry/virtualenvs
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+    - name: Install Poetry Action
+      uses: snok/install-poetry@v1.3.4
+    - run: poetry install --no-root
     - run: poetry run task lint
 
   formatter:
@@ -42,7 +65,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: formatter
-    needs: build  # Ustalamy, że formatowanie uruchamia się po zakończeniu joba 'build'
+    needs: build  # Formatter uruchamia się po zakończeniu joba 'build'
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -51,7 +74,7 @@ jobs:
       with:
         path: ~/.cache/pypoetry/virtualenvs
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
@@ -67,7 +90,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: security
-    needs: build  # Ustalamy, że bezpieczeństwo uruchamia się po zakończeniu joba 'build'
+    needs: build  # Security uruchamia się po zakończeniu joba 'build'
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -76,7 +99,7 @@ jobs:
       with:
         path: ~/.cache/pypoetry/virtualenvs
         key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
