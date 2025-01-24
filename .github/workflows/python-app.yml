@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  lint:
+  build:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -32,30 +32,8 @@ jobs:
     - name: Install Poetry Action
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
-    - run: poetry run flake8
-
-  unit-tests:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./example-app
-    needs: lint
-    steps:
-    - uses: actions/checkout@v4
-    - name: Cache build venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pypoetry/virtualenvs
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.11"
-    - name: Install Poetry Action
-      uses: snok/install-poetry@v1.3.4
-    - run: poetry install --no-root
     - run: poetry run task test
+    - run: poetry run task lint
 
   formatter:
     runs-on: ubuntu-latest
@@ -64,7 +42,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: formatter
-    needs: lint
+    needs: build
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -89,7 +67,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: security
-    needs: lint
+    needs: build
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
