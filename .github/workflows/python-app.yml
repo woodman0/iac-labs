@@ -10,6 +10,7 @@ permissions:
   contents: read
 
 jobs:
+  # Główna grupa jobów
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -33,6 +34,7 @@ jobs:
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
 
+  # Grupa jobów statycznych
   linter:
     runs-on: ubuntu-latest
     defaults:
@@ -40,7 +42,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: linter
-    needs: build 
+    needs: build  # Linter uruchamia się po zakończeniu joba 'build'
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -65,7 +67,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: formatter
-    needs: build 
+    needs: build  # Formatter uruchamia się po zakończeniu joba 'build'
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -90,7 +92,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: security
-    needs: build 
+    needs: build  # Security uruchamia się po zakończeniu joba 'build'
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -108,12 +110,13 @@ jobs:
     - run: poetry install --no-root
     - run: poetry run task security
 
-
+  # Unittests - testy jednostkowe po zakończeniu głównych jobów
   unittests:
     runs-on: ubuntu-latest
     concurrency:
       group: unittests
-    needs: [build, linter, formatter, security] 
+    needs: [build, linter, formatter, security]  # Uruchamia się po zakończeniu jobów z głównej grupy
+    steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
       id: cached-poetry-dependencies
@@ -129,4 +132,4 @@ jobs:
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
     - name: Run Unit Tests
-      run: poetry run task test 
+      run: poetry run task test  # Zakładając, że masz zadanie 'test' w pyproject.toml
