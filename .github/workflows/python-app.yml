@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -32,7 +32,6 @@ jobs:
     - name: Install Poetry Action
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
-    - run: poetry run task lint
     - run: poetry run flake8
 
   unit-tests:
@@ -40,7 +39,7 @@ jobs:
     defaults:
       run:
         working-directory: ./example-app
-    needs: build
+    needs: lint
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -65,7 +64,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: formatter
-    needs: build
+    needs: lint
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -90,7 +89,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: security
-    needs: build
+    needs: lint
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
