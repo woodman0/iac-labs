@@ -110,11 +110,11 @@ jobs:
     - run: poetry install --no-root
     - run: poetry run task security
 
-  # Unittests - testy jednostkowe po zakończeniu głównych jobów
-  unittests:
+  # Testy statyczne poza główną grupą
+  static_tests:
     runs-on: ubuntu-latest
     concurrency:
-      group: unittests
+      group: static_tests
     needs: [build, linter, formatter, security]  # Uruchamia się po zakończeniu jobów z głównej grupy
     steps:
     - uses: actions/checkout@v4
@@ -131,5 +131,7 @@ jobs:
     - name: Install Poetry Action
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
-    - name: Run Unit Tests
-      run: poetry run task test  # Zakładając, że masz zadanie 'test' w pyproject.toml
+    - name: Run Static Tests (e.g. additional linting, security analysis)
+      run: |
+        poetry run task additional-lint
+        poetry run task additional-security
