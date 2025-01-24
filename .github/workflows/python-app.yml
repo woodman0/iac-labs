@@ -10,7 +10,6 @@ permissions:
   contents: read
 
 jobs:
-  # Główna grupa jobów
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -34,7 +33,6 @@ jobs:
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
 
-  # Grupa jobów statycznych
   linter:
     runs-on: ubuntu-latest
     defaults:
@@ -42,7 +40,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: linter
-    needs: build  # Linter uruchamia się po zakończeniu joba 'build'
+    needs: build 
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -67,7 +65,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: formatter
-    needs: build  # Formatter uruchamia się po zakończeniu joba 'build'
+    needs: build 
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -92,7 +90,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: security
-    needs: build  # Security uruchamia się po zakończeniu joba 'build'
+    needs: build 
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -110,13 +108,12 @@ jobs:
     - run: poetry install --no-root
     - run: poetry run task security
 
-  # Testy statyczne poza główną grupą
-  static_tests:
+
+  unittests:
     runs-on: ubuntu-latest
     concurrency:
-      group: static_tests
-    needs: [build, linter, formatter, security]  # Uruchamia się po zakończeniu jobów z głównej grupy
-    steps:
+      group: unittests
+    needs: [build, linter, formatter, security] 
     - uses: actions/checkout@v4
     - name: Cache build venv
       id: cached-poetry-dependencies
@@ -131,7 +128,5 @@ jobs:
     - name: Install Poetry Action
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
-    - name: Run Static Tests (e.g. additional linting, security analysis)
-      run: |
-        poetry run task additional-lint
-        poetry run task additional-security
+    - name: Run Unit Tests
+      run: poetry run task test 
