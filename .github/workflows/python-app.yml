@@ -10,6 +10,7 @@ permissions:
   contents: read
 
 jobs:
+  # Główna grupa jobów
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -33,6 +34,7 @@ jobs:
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
 
+  # Grupa jobów statycznych
   linter:
     runs-on: ubuntu-latest
     defaults:
@@ -107,3 +109,29 @@ jobs:
       uses: snok/install-poetry@v1.3.4
     - run: poetry install --no-root
     - run: poetry run task security
+
+  # Testy statyczne poza główną grupą
+  static_tests:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: static_tests
+    needs: [build, linter, formatter, security]  # Uruchamia się po zakończeniu jobów z głównej grupy
+    steps:
+    - uses: actions/checkout@v4
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pypoetry/virtualenvs
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+    - name: Install Poetry Action
+      uses: snok/install-poetry@v1.3.4
+    - run: poetry install --no-root
+    - name: Run Static Tests (e.g. additional linting, security analysis)
+      run: |
+        poetry run task additional-lint
+        poetry run task additional-security
