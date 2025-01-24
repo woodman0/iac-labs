@@ -42,7 +42,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: formatter
-    needs: build  # Ustalamy, że formatowanie uruchamia się po zakończeniu joba 'build'
+    needs: build
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
@@ -67,7 +67,7 @@ jobs:
         working-directory: ./example-app
     concurrency:
       group: security
-    needs: build  # Ustalamy, że bezpieczeństwo uruchamia się po zakończeniu joba 'build'
+    needs: build
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
