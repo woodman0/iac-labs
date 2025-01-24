@@ -12,12 +12,14 @@ permissions:
 jobs:
   # Główna grupa jobów
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: ./example-app
+        shell: bash  # Ustawienie powłoki na bash, aby uniknąć PowerShell w Windows
     concurrency:
       group: build
+    matrix:
+      os: [ubuntu-latest, windows-latest]  # Testowanie na dwóch systemach
     steps:
     - uses: actions/checkout@v4
     - name: Cache build venv
